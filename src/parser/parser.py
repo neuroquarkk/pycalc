@@ -1,10 +1,32 @@
 from typing import List
 from error.errors import ParserError
 from lexer.tokens import Token, TokenType
-from .ast import ASTNode, BinaryOpNode, NumberNode, UnaryOpNode
+from .ast import (
+    ASTNode,
+    BinaryOpNode,
+    ConstantNode,
+    FunctionCallNode,
+    NumberNode,
+    UnaryOpNode,
+)
 
 
 class Parser:
+    CONSTANTS = {"pi", "e"}
+
+    # functions and their expected argument counts
+    FUNCTIONS = {
+        "abs": 1,
+        "sqrt": 1,
+        "pow": 2,
+        "min": -1,  # -1 means variable arguments (at least 1)
+        "max": -1,
+        "round": -1,  # 1 or 2 arguments
+        "sin": 1,
+        "cos": 1,
+        "tan": 1,
+    }
+
     def __init__(self, tokens: List[Token]):
         self.tokens = tokens
         self.pos = 0
@@ -77,6 +99,23 @@ class Parser:
             self.__expect(TokenType.RPAREN)
             return node
 
+        if token and token.type == TokenType.IDENTIFIER:
+            identifier = token.value
+            self.__advance()
+
+            if (
+                self.current_token
+                and self.current_token.type == TokenType.LPAREN
+            ):
+                if identifier not in self.FUNCTIONS:
+                    raise ParserError(f"Unknown function '{identifier}'", token)
+                return self.__parse_function_call(identifier)
+
+            if identifier not in self.CONSTANTS:
+                raise ParserError(f"Unknown constant'{identifier}'", token)
+
+            return ConstantNode(identifier)
+
         raise ParserError("Expected Number or '('", token)
 
     def parse(self) -> ASTNode:
@@ -94,3 +133,44 @@ class Parser:
             )
 
         return ast
+
+    def __parse_function_call(self, func_name: str) -> FunctionCallNode:
+        self.__expect(TokenType.LPAREN)
+
+        arguments = []
+
+        if self.current_token and self.current_token.type == TokenType.RPAREN:
+            self.__advance()
+            expected_args = self.FUNCTIONS[func_name]
+            if expected_args > 0:
+                raise ParserError(
+                    f"Function '{func_name}' expects {
+                        expected_args
+                    } argument(s)",
+                    self.current_token,
+                )
+            return FunctionCallNode(func_name, arguments)
+
+        arguments.append(self.__expression())
+
+        while self.current_token and self.current_token.type == TokenType.COMMA:
+            self.__advance()
+            arguments.append(self.__expression())
+
+        self.__expect(TokenType.RPAREN)
+
+        expected_args = self.FUNCTIONS[func_name]
+        if expected_args > 0 and len(arguments) != expected_args:
+            raise ParserError(
+                f"Function '{func_name}' expects {
+                    expected_args
+                } argument(s), got {len(arguments)}",
+                self.current_token,
+            )
+        elif expected_args == -1 and len(arguments) == 0:
+            raise ParserError(
+                f"Function '{func_name}' expects at least 1 argument",
+                self.current_token,
+            )
+
+        return FunctionCallNode(func_name, arguments)

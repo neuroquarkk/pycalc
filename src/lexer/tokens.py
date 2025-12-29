@@ -6,6 +6,7 @@ from typing import Any
 class TokenType(Enum):
     # Literals
     NUMBER = auto()
+    IDENTIFIER = auto()  # for constants and function names
 
     # Operators
     PLUS = auto()
@@ -16,6 +17,7 @@ class TokenType(Enum):
     # Grouping
     LPAREN = auto()
     RPAREN = auto()
+    COMMA = auto()  # for function arguments
 
     # Special
     EOF = auto()

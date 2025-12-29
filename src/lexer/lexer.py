@@ -39,6 +39,18 @@ class Lexer:
         value = float(num_str) if has_dot else int(num_str)
         return Token(TokenType.NUMBER, value, start_pos)
 
+    def __read_identifier(self) -> Token:
+        start_pos = self.pos
+        identifier = ""
+
+        while self.current_char and (
+            self.current_char.isalnum() or self.current_char == "_"
+        ):
+            identifier += self.current_char
+            self.__advance()
+
+        return Token(TokenType.IDENTIFIER, identifier, start_pos)
+
     def tokenize(self) -> List[Token]:
         tokens: List[Token] = []
 
@@ -51,6 +63,10 @@ class Lexer:
                 tokens.append(self.__read_number())
                 continue
 
+            if self.current_char.isalpha() or self.current_char == "_":
+                tokens.append(self.__read_identifier())
+                continue
+
             token_map: Dict[str, TokenType] = {
                 "+": TokenType.PLUS,
                 "-": TokenType.MINUS,
@@ -58,6 +74,7 @@ class Lexer:
                 "/": TokenType.DIVIDE,
                 "(": TokenType.LPAREN,
                 ")": TokenType.RPAREN,
+                ",": TokenType.COMMA,
             }
 
             if self.current_char in token_map:

@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import List
 
 
 class ASTNode(ABC):
@@ -35,3 +36,21 @@ class UnaryOpNode(ASTNode):
 
     def __repr__(self) -> str:
         return f"UnaryOp({self.operator}, {self.operand})"
+
+
+@dataclass
+class ConstantNode(ASTNode):
+    name: str
+
+    def __repr__(self) -> str:
+        return f"Constant({self.name})"
+
+
+@dataclass
+class FunctionCallNode(ASTNode):
+    name: str
+    args: List[ASTNode]
+
+    def __repr__(self) -> str:
+        arg_str = ", ".join(str(arg) for arg in self.args)
+        return f"Functioncall({self.name}, [{arg_str}])"

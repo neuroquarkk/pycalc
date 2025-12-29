@@ -34,6 +34,30 @@ class REPL:
         print("=" * 70)
         print()
 
+    def __print_help(self) -> None:
+        print("\nAvailable commands:")
+        print("  exit, quit, q  - Exit the calculator")
+        print("  history        - Show calculation history")
+        print("  clear          - Clear history")
+        print("  help           - Show this help message")
+        print("\nSupported operations:")
+        print("  +, -, *, /     - Basic arithmetic")
+        print("  ( )            - Grouping")
+        print("  +x, -x         - Unary Operators")
+        print("\nBuilt-in constants:")
+        print("  pi             - π (3.14159...)")
+        print("  e              - Euler's number (2.71828...)")
+        print("\nBuilt-in functions:")
+        print("  abs(x)         - Absolute value")
+        print("  sqrt(x)        - Square root")
+        print("  pow(x, y)      - x raised to the power y")
+        print("  min(x, y, ...) - Minimum of values")
+        print("  max(x, y, ...) - Maximum of values")
+        print("  round(x, n)    - Round x to n decimal places")
+        print("  sin(x)         - Sine (radians)")
+        print("  cos(x)         - Cosine (radians)")
+        print("  tan(x)         - Tangent (radians)")
+
     def __handle_command(self, command: str) -> bool:
         command = command.strip().lower()
 
@@ -58,15 +82,7 @@ class REPL:
             return True
 
         if command == "help":
-            print("\nAvailable commands:")
-            print("  exit, quit, q  - Exit the calculator")
-            print("  history        - Show calculation history")
-            print("  clear          - Clear history")
-            print("  help           - Show this help message")
-            print("\nSupported operations:")
-            print("  +, -, *, /     - Basic arithmetic")
-            print("  ( )            - Grouping")
-            print("  +x, -x         - Unary Operators")
+            self.__print_help()
             return True
 
         return False
